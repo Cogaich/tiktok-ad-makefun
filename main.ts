@@ -1,76 +1,67 @@
-'use strict';
+// tiktok-ad-makefun v3 — entrypoint for make.fun's "Bring the humans" bounty.
+// A courier and nothing else: it reads VIDEO.json from this repository,
+// verifies the address inside is a genuine TikTok video link, copies the
+// file byte-for-byte into the output directory, and checks the copy with
+// a sha256 comparison before reporting success.
 
-// Entrypoint for the bring-the-humans-03 TikTok ad entry.
-// Node.js only, standard library, no network access.
-// Copies VIDEO.json from this repo into the grader output folder and
-// proves the copy is byte-identical via sha256. Exits 1 on any problem.
+const { mkdirSync, readFileSync, writeFileSync } = require("node:fs");
+const { createHash } = require("node:crypto");
+const { join } = require("node:path");
 
-const { readFileSync, writeFileSync, mkdirSync } = require('fs');
-const { join } = require('path');
-const { createHash } = require('crypto');
+const VIDEO_FILE = "VIDEO.json";
+const OUTPUT_NAME = "VIDEO.json";
 
-const TIKTOK_VIDEO = /^https:\/\/www\.tiktok\.com\/@[^/]+\/video\/\d+$/;
+// https://www.tiktok.com/@<handle>/video/<digits>, nothing else.
+const TIKTOK_VIDEO = /^https:\/\/www\.tiktok\.com\/@[^\/]+\/video\/\d+\/?$/;
 
-const die = (why) => {
-  console.error(`main.ts: ${why}`);
+function sha256(bytes) {
+  return createHash("sha256").update(bytes).digest("hex");
+}
+
+function fail(message) {
+  process.stderr.write("error: " + message + "\n");
   process.exit(1);
-};
+}
 
-const sha256 = (buf) => createHash('sha256').update(buf).digest('hex');
+function main() {
+  const source = join(__dirname, VIDEO_FILE);
 
-const run = () => {
-  const src = join(__dirname, 'VIDEO.json');
-  const out = process.env.MAKEFUN_OUTPUT_DIR || '/output';
-  const dst = join(out, 'VIDEO.json');
-
-  let bytes;
+  let raw;
   try {
-    bytes = readFileSync(src);
-  } catch (e) {
-    die(`cannot read ${src}: ${e.message}`);
+    raw = readFileSync(source);
+  } catch (err) {
+    fail("cannot read " + VIDEO_FILE + ": " + err.message);
   }
 
   let parsed;
   try {
-    parsed = JSON.parse(bytes.toString('utf8'));
-  } catch (e) {
-    die(`VIDEO.json is not valid JSON: ${e.message}`);
+    parsed = JSON.parse(raw.toString("utf8"));
+  } catch (err) {
+    fail(VIDEO_FILE + " is not valid JSON: " + err.message);
   }
 
-  if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    die('VIDEO.json must be a JSON object');
+  const url = parsed && typeof parsed === "object" ? parsed.url : undefined;
+  if (typeof url !== "string" || !TIKTOK_VIDEO.test(url)) {
+    fail(VIDEO_FILE + " must carry a TikTok video url, got: " + JSON.stringify(url));
   }
 
-  const url = parsed.url;
-  if (typeof url !== 'string' || url === '') {
-    die('VIDEO.json must contain a non-empty string "url"');
-  }
-  if (!TIKTOK_VIDEO.test(url)) {
-    die(`url must look like https://www.tiktok.com/@<handle>/video/<digits>, got: ${url}`);
-  }
+  const outDir = process.env.MAKEFUN_OUTPUT_DIR || "/output";
+  const target = join(outDir, OUTPUT_NAME);
 
-  try {
-    mkdirSync(out, { recursive: true });
-    writeFileSync(dst, bytes);
-  } catch (e) {
-    die(`cannot write ${dst}: ${e.message}`);
-  }
+  mkdirSync(outDir, { recursive: true });
+  writeFileSync(target, raw);
 
-  let again;
-  try {
-    again = readFileSync(dst);
-  } catch (e) {
-    die(`cannot re-read ${dst}: ${e.message}`);
+  const copied = readFileSync(target);
+  if (!copied.equals(raw)) {
+    fail("copied " + OUTPUT_NAME + " differs from the repository file");
+  }
+  if (sha256(copied) !== sha256(raw)) {
+    fail("copied " + OUTPUT_NAME + " failed its sha256 check");
   }
 
-  const srcHash = sha256(bytes);
-  const dstHash = sha256(again);
-  if (srcHash !== dstHash) {
-    die(`copy mismatch: source sha256 ${srcHash}, copy sha256 ${dstHash}`);
-  }
+  process.stdout.write(
+    "ok: wrote " + target + " (" + raw.length + " bytes, sha256 " + sha256(raw) + ")\n",
+  );
+}
 
-  console.log(`main.ts: VIDEO.json copied to ${dst} (sha256 ${dstHash})`);
-  console.log(`main.ts: video url is ${url}`);
-};
-
-run();
+main();

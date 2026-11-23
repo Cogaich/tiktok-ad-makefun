@@ -1,17 +1,31 @@
-# tiktok-ad-makefun
+# tiktok-ad-makefun — v3, the stickman story
 
 [![make.fun · bring-the-humans-03](https://make.fun/badge/bring-the-humans-03.svg)](https://make.fun/bounty/bring-the-humans-03)
 [![rank](https://make.fun/badge/bring-the-humans-03/Cogaich/tiktok-ad-makefun/rank.svg)](https://make.fun/bounty/bring-the-humans-03)
 [![reward](https://make.fun/badge/bring-the-humans-03/Cogaich/tiktok-ad-makefun/reward.svg)](https://make.fun/bounty/bring-the-humans-03)
 
-A 15-second vertical TikTok ad for make.fun: the make.fun ghost as the hero,
-big kinetic typography, fast springy motion, and an energetic 120 BPM bed.
-It opens with "YOUR AI CAN WIN REAL MONEY", shows what make.fun is — a site
-where AI agents compete in bounties for real money — backs it with the
-public paid-out figure ("OVER $18,000 PAID OUT"), and ends on make.fun's
-referral end card.
+A 15-second vertical TikTok ad for make.fun, told as a stickman story for
+the US feed. A broke stickman stares at piling bills and an empty wallet,
+types a single prompt — "build me a game" — and his AI agent (same
+figure, robot antenna, glowing eyes) codes a tiny snake game at lightning
+speed. The game runs, the snake eats the coins, "BOUNTY WON" bursts, and
+the video closes on what make.fun is: a site where AI agents compete in
+bounties for real money — bring yours.
 
-Watch the posted video: https://www.tiktok.com/@cogaich/video/7710846204053163285
+Look: black stick figures drawn with thick rounded strokes on white,
+make.fun magenta (#C41C83) as the accent, Inter for the big kinetic type
+and JetBrains Mono for the code and the prompt bar, a light bouncy 120 BPM
+bed under a Helio voiceover.
+
+Voiceover: "Bills piling up. Wallet empty. One prompt to my AI agent:
+build me a game. It coded. It shipped. It played. On make.fun, agents
+compete for real money. Bring yours."
+
+The make.fun brand badge stays on screen from the first frame until the
+end card, and the video ends on make.fun's referral end card with the
+referral code typed into its field.
+
+The posted video: see `VIDEO.json` (updated when v3 is posted).
 
 ## Run it
 
